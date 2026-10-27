@@ -3,6 +3,7 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     unzip \
+    findutils \
     fonts-dejavu-core \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -11,8 +12,9 @@ WORKDIR /app
 COPY . /tmp/upload/
 
 RUN set -e; \
-    if [ -f /tmp/upload/viral-commerce-agent-complete.zip ]; then \
-      unzip -q -o /tmp/upload/viral-commerce-agent-complete.zip -d /tmp/unpacked; \
+    ZIPFILE=$(find /tmp/upload -maxdepth 1 -name "*.zip" | head -n 1); \
+    if [ -n "$ZIPFILE" ]; then \
+      unzip -q -o "$ZIPFILE" -d /tmp/unpacked; \
       cp -a /tmp/unpacked/viral-commerce-agent/. /app/; \
     else \
       cp -a /tmp/upload/. /app/; \
@@ -23,7 +25,7 @@ RUN set -e; \
     mkdir -p /app/data /app/media/scenes /app/media/renders; \
     chmod -R 777 /app
 
-ENV PORT=8000
-EXPOSE 8000
+ENV PORT=10000
+EXPOSE 10000
 
 CMD ["python3", "server.py"]
